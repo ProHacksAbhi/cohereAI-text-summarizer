@@ -1,44 +1,23 @@
 import streamlit as st
-import cohere
-import os
-from dotenv import load_dotenv
+import main  
 
-# Load API Key 
-load_dotenv()
-cohere_api_key = os.getenv("COHERE_API_KEY")
+st.title("Text Summarization App")
+st.write("Powered by Cohere")
 
-# Initialize Cohere Client V2  
-co = cohere.ClientV2(api_key=cohere_api_key)
+user_input = st.text_area("Enter text to summarize:", height=300)
 
-# Streamlit UI 
-st.title("Text Summarization with Cohere")
-st.write("This uses Coheres API summarized text. Enter the text you want to summarize below.")
-
-# Text Input ("height equals 300")
-user_input = st.text_area("Enter text:", height=300)
-
-# Logic ( flow: Button -> Input Check -> Spinner -> Try/Except)
+# Interaction Logic
 if st.button("Summarize"):
     if user_input:
-        with st.spinner("Summarizing..."):
-            try:
-                # Prepare the message ( "Generate a concise summary...")
-                message = f"Generate a concise summary for the following text: {user_input}"
-                
-                # Call Chat Endpoint ( "change summarize endpoint to chat endpoint")
-                response = co.chat(
-                    model="command-r-plus",
-                    messages=[{"role": "user", "content": message}]
-                )
-                
-                # Extract Summary ("response.message.content[0].text")
-                summary = response.message.content[0].text
-                
-                # Display Result
-                st.subheader("Summarized Text")
-                st.write(summary)
-                
-            except Exception as e:
-                st.error(f"An error occurred: {e}")
+        with st.spinner("Talking to Cohere..."):
+            # Call the function from main.py
+            summary_result = main.get_summary(user_input)
+            
+            # Check for errors returned by the function
+            if "Error:" in summary_result:
+                st.error(summary_result)
+            else:
+                st.subheader("Summary")
+                st.write(summary_result)
     else:
-        st.warning("Please enter some text to summarize.")
+        st.warning("Please enter some text first.")
